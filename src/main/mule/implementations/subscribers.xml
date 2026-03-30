@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<sub-flow name="impl-get-subscribers" doc:id="7af29dbc-b212-4ed0-ae54-7359ebb42260" >
+		<db:select doc:name="Select" doc:id="be8812f5-6899-4024-91b7-a84680bf99c1" config-ref="Database_Config">
+			<db:sql ><![CDATA[SELECT * FROM subscribers]]></db:sql>
+		</db:select>
+		<logger level="INFO" doc:name="Retrieve subscribers" doc:id="94d7f397-76d4-4c72-9661-7357fabae7d7" message="#[%dw 2.0&#10;&#10;output application/json indent=false&#10;---&#10;{&#10;    step: vars.metadata.startStep,&#10;    data: {&#10;        business: {},&#10;        technical: payload&#10;    }&#10;}]" category="{app.name}"/>
+		<ee:transform doc:name="Subscribers to SDM" doc:id="415e7a7c-b81f-446c-8243-60a5ee99dc11" >
+			<ee:message >
+				<ee:set-payload resource="modules/database.dwl" />
+			</ee:message>
+		</ee:transform>
+		<logger level="DEBUG" doc:name="End" doc:id="b3560d30-81da-49d6-a4c2-f1b6d7153804" message="#[%dw 2.0&#10;output json indent=false&#10;&#10;---&#10;{&#10; step: vars.metadata.endStep,&#10; data: {&#10;  business: payload,&#10;  technical: {}&#10; }&#10;}]" category="{app.name}"/>
+	</sub-flow>
+</mule>
