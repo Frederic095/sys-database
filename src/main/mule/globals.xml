@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule
-	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db"
 	xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway"
 	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
 	xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties"
 	xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit"
 	xmlns:http="http://www.mulesoft.org/schema/mule/http"
-	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
 http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd
@@ -15,12 +17,13 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd
 http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
 	<http:listener-config
-		name="sys-database-api-api-httpListenerConfig" basePath="${application.base-path}">
+		name="sys-database-httpListenerConfig"
+		basePath="${application.base-path}">
 		<http:listener-connection host="0.0.0.0"
 			port="${https.port}" />
 	</http:listener-config>
-	<apikit:config name="sys-database-api-api-config"
-		api="resource::10339a90-b6cf-4a68-8cc1-ec2e54f05373:sys-database-api:1.0.0:raml:zip:sys-database-api.raml"
+	<apikit:config name="sys-database-config"
+		api="resource::10339a90-b6cf-4a68-8cc1-ec2e54f05373:sys-database-api:1.0.4:raml:zip:sys-database-api.raml"
 		outboundHeadersMapName="outboundHeaders"
 		httpStatusVarName="httpStatus" />
 	<configuration-properties
@@ -36,10 +39,27 @@ http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/cu
 		doc:id="e91c0e56-24d0-4a3d-aa81-3cdf5bdd8b4c"
 		file="properties/secure/${mule.env}-properties.yaml"
 		key="${mule.encryptionKey}" />
-	<api-gateway:autodiscovery apiId="${autodiscoveryId}" ignoreBasePath="true" doc:name="API Autodiscovery" doc:id="6938075d-7b75-4c3b-9925-8340eb6437cf" flowRef="sys-database-api-api-main" />
-	<db:config name="Database_Config" doc:name="Database Config" doc:id="9875fd05-2b82-4b9f-aba4-4651cb922764" >
-		<db:generic-connection url="jdbc:postgresql://${db.host}:${db.port}/${db.database}" user="${db.user}" password="${db.password}" driverClassName="org.postgresql.Driver"/>
+	<api-gateway:autodiscovery
+		apiId="${autodiscoveryId}" ignoreBasePath="true"
+		doc:name="API Autodiscovery"
+		doc:id="6938075d-7b75-4c3b-9925-8340eb6437cf"
+		flowRef="sys-database-main" />
+	<db:config name="MoviesDatabase_Config"
+		doc:name="Database Config"
+		doc:id="9875fd05-2b82-4b9f-aba4-4651cb922764">
+		<db:generic-connection
+			url="jdbc:postgresql://${db-movies.host}:${db-movies.port}/${db-movies.database}"
+			user="${db-movies.user}" password="${db-movies.password}"
+			driverClassName="org.postgresql.Driver" />
 	</db:config>
+	<http:request-config name="supabase_config" doc:name="HTTP Request config" doc:id="114a621d-930e-43d7-8b83-457fc37aff1b" basePath="/${db-climbing-spots.base-path}" >
+		<http:request-connection host="${db-climbing-spots.host}" port="443" protocol="HTTPS"/>
+		<http:default-headers >
+			<http:default-header key="apikey" value="${db-climbing-spots.api-key}" />
+			<http:default-header key="Authorization" value="Bearer ${db-climbing-spots.api-key}" />
+			<http:default-header key="Content-Type" value="application/json" />
+		</http:default-headers>
+	</http:request-config>
 	<sub-flow name="genericError" doc:id="970c16a1-fccd-436c-aefa-b50da2f3a6bf" >
 		<set-variable value='#[error.errorType.identifier match {&#10;  case "BAD_REQUEST"            -&gt; 400&#10;  case "UNAUTHORIZED"           -&gt; 401&#10;  case "FORBIDDEN"              -&gt; 403&#10;  case "NOT_FOUND"              -&gt; 404&#10;  case "METHOD_NOT_ALLOWED"     -&gt; 405&#10;  case "NOT_ACCEPTABLE"         -&gt; 406&#10;  case "CONFLICT"                -&gt; 409&#10;  case "UNSUPPORTED_MEDIA_TYPE" -&gt; 415&#10;  case "NOT_IMPLEMENTED"        -&gt; 501&#10;  else                          -&gt; error.errorMessage.attributes.statusCode default vars.httpStatus default 500&#10;}]' doc:name="[httpStatus]" doc:id="f9dd5ffa-08b8-4ae5-9131-8a2a5402af72" variableName="httpStatus"/>
 		<ee:transform doc:name="Transform Message" doc:id="5951f506-39c5-43bc-b4d2-7c471607a928" >

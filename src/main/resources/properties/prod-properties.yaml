@@ -6,13 +6,17 @@ autodiscoveryId: "20804582"
 https:
   port: "8084"
 ################################
-
-db:
+db-movies:
   host: "sql.bylinkr.com"
   port: "5436"
   user: "training"
-  password: "${secure::db.password}"
+  password: "${secure::db-movies.password}"
   database: "training-mdbp"
   table: "subscribers"
   schema: "CF Mappings"
 
+db-climbing-spots:
+  host: "kmohukcnadlsjrzxwopk.supabase.co"
+  base-path: "rest/v1"
+  table: "Users"
+  api-key: "${secure::db-climbing-spots.api-key}"

@@ -1,2 +1,5 @@
-db:
+db-movies:
   password: "![4aUe4ZNVi/s/k8hyQ9tacg==]"
+
+db-climbing-spots: 
+  api-key: "![sUnRUGak4IIZ8RJROat63SS8RMqxAPtmfNcl27lvwMY/NwbCkKGylZxadxqLq1W4]"
