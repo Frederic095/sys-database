@@ -9,13 +9,13 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
 	<sub-flow name="impl-get-users" doc:id="fc59e051-3f1e-46f1-8c58-cc8933c12d9d" >
 		<http:request doc:name="Request" doc:id="48499e1c-4886-4dc8-b3d3-46eeddaf1a46" path="/${db-climbing-spots.table}" config-ref="supabase_config"/>
-		<logger level="DEBUG" doc:name="Retrieve subscribers" doc:id="e95342a6-7201-4f0d-898f-8f801b2b7fde" message="#[%dw 2.0&#10;&#10;output application/json indent=false&#10;---&#10;{&#10;    step: vars.metadata.startStep,&#10;    data: {&#10;        business: {},&#10;        technical: {        	&#10;        subscribers: payload&#10;        }&#10;    }&#10;}]" category="{app.name}" />
+		<logger level="DEBUG" doc:name="Retrieve subscribers" doc:id="e95342a6-7201-4f0d-898f-8f801b2b7fde" message="#[%dw 2.0&#10;&#10;output application/json indent=false&#10;---&#10;{&#10;    step: vars.metadata.startStep,&#10;    data: {&#10;        business: {},&#10;        technical: {        	&#10;        subscribers: sizeOf(payload)&#10;        }&#10;    }&#10;}]" category="{app.name}" />
 		<set-payload value="#[%dw 2.0&#10;output application/json&#10;---&#10;&#10;payload map(item) -&gt; {&#10;	&#10;	firstname: item.firstname as String,&#10;	lastname: item.lastname as String,&#10;	email: item.email as String,&#10;	level: item.level as String&#10;	&#10;}]" doc:name="Users to UDM" doc:id="f1efe463-03a8-4c55-9bf7-17518a28b556" />
 		<!-- [STUDIO:"Users to UDM"]<ee:transform doc:name="Users to UDM" doc:id="99d07492-fe34-4377-a765-7200784d4f41" >
 			<ee:message >
 				<ee:set-payload resource="modules/Users.dwl" />
 			</ee:message>
 		</ee:transform> [STUDIO] -->
-		<logger level="DEBUG" doc:name="After Transform" doc:id="e13cab4f-817d-41de-b782-c7ab76397037" message='#[%dw 2.0&#10;output json indent=false&#10;&#10;---&#10;{&#10; step: "After Transform Step",&#10; data: {&#10;  business:&#10;  {&#10;  	UDM: payload&#10;  },&#10;  technical: {}&#10; }&#10;}]' category="{app.name}" />
+		<logger level="DEBUG" doc:name="After Transform" doc:id="e13cab4f-817d-41de-b782-c7ab76397037" message='#[%dw 2.0&#10;output json indent=false&#10;&#10;---&#10;{&#10; step: "After Transform Step",&#10; data: {&#10;  business:&#10;  {&#10;  	UDM: sizeOf(payload)&#10;  },&#10;  technical: {}&#10; }&#10;}]' category="{app.name}" />
 	</sub-flow>
 </mule>
